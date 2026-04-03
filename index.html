@@ -488,6 +488,23 @@
       letter-spacing: 0.03em;
     }
 
+    .unit-toggle {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      background: var(--surface2);
+      color: var(--text-dim);
+      padding: 4px 8px;
+      border-radius: 999px;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s;
+    }
+    .unit-toggle:active {
+      transform: scale(0.92);
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
     .exercise-prev {
       font-family: var(--font-mono);
       font-size: 10px;
@@ -2013,8 +2030,11 @@
         div.className = 'exercise-group';
         div.innerHTML = `
       <div class="exercise-header">
-        <div class="exercise-name">${safeExerciseName}</div>
-        ${prev ? `<div class="exercise-prev">PREV<span>${escapeHtml(prev.weight)}${escapeHtml(prev.unit)} × ${escapeHtml(prev.reps)}</span></div>` : '<div class="exercise-prev">PREV<span>—</span></div>'}
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div class="exercise-name">${safeExerciseName}</div>
+          <div class="unit-toggle" onclick="toggleExerciseUnit('${escapeJsString(exName)}')">${(sets.length > 0 ? (sets[0].unit || getPreferredUnit()) : getPreferredUnit()).toUpperCase()}</div>
+        </div>
+        ${prev ? `<div class="exercise-prev">PREV<span>${escapeHtml(prev.weight)}${escapeHtml(prev.unit).toUpperCase()} × ${escapeHtml(prev.reps)}</span></div>` : '<div class="exercise-prev">PREV<span>—</span></div>'}
       </div>
       <div class="set-inputs" id="sets-${safeDomId(exName)}">
         ${sets.map(s => renderSetInputRow(s)).join('')}
@@ -2029,6 +2049,19 @@
       const banner = document.getElementById('complete-banner');
       if (allDone) banner.classList.add('show');
       else banner.classList.remove('show');
+    }
+
+    function toggleExerciseUnit(exName) {
+      if (!DB.activeSession) return;
+      const sets = DB.activeSession.sets.filter(s => s.exerciseName === exName);
+      if (!sets.length) return;
+      
+      const current = sets[0].unit || getPreferredUnit();
+      const next = current === 'lb' ? 'kg' : 'lb';
+      
+      sets.forEach(s => s.unit = next);
+      saveData(DB);
+      renderActiveWorkout();
     }
 
     function getPrevExerciseSummary(exerciseName, workoutName) {
@@ -2125,7 +2158,7 @@
       return `
     <div class="set-input-row ${rowClass}" id="set-row-${s.index}">
       ${label}
-      <input type="number" inputmode="decimal" placeholder="${getPreferredUnit()}s" value="${escapeHtml(s.weight)}" 
+      <input type="number" inputmode="decimal" placeholder="${(s.unit || getPreferredUnit()).toUpperCase()}" value="${escapeHtml(s.weight)}" 
              onchange="updateSet(${s.index},'weight',this.value)" style="border-color:${s.completed ? 'var(--border)' : ''}">
       <input type="number" inputmode="numeric" placeholder="reps" value="${escapeHtml(s.reps)}"
              onchange="updateSet(${s.index},'reps',this.value)" style="border-color:${s.completed ? 'var(--border)' : ''}">

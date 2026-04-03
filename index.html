@@ -1267,11 +1267,16 @@
      PAGE: LOG
 ═══════════════════════════════════════════ -->
   <div class="page" id="page-log">
-    <div class="page-header">
-      <div class="page-title">LOG</div>
-      <div class="page-subtitle" id="log-subtitle">0 SESSIONS</div>
-      <div class="header-status offline" id="log-sync-indicator">
-        <div class="status-dot"></div><span>NOT CONNECTED</span>
+    <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-end">
+      <div>
+        <div class="page-title">LOG</div>
+        <div class="page-subtitle" id="log-subtitle">0 SESSIONS</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+        <button class="btn btn-primary" onclick="openNewLogModal()">+ NEW</button>
+        <div class="header-status offline" id="log-sync-indicator">
+          <div class="status-dot"></div><span>NOT CONNECTED</span>
+        </div>
       </div>
     </div>
     <div class="log-filters" id="log-filters">
@@ -1450,6 +1455,37 @@
       </div>
     </div>
   </div>
+
+      <!-- ══════════════════════════════════════════
+         MODAL: NEW LOG
+      ═══════════════════════════════════════════ -->
+      <div class="modal-overlay" id="modal-log">
+        <div class="modal">
+          <div class="modal-handle"></div>
+          <div class="modal-header">
+            <div class="modal-title">NEW LOG</div>
+            <button class="btn btn-ghost" onclick="closeModal('modal-log')">✕</button>
+          </div>
+                <div class="modal-body">
+                  <div class="form-group">
+                    <div class="form-label">Workout Name</div>
+                    <input type="text" id="log-name" placeholder="e.g. Upper, Leg Day…">
+                  </div>
+                  <div class="form-group">
+                    <div class="form-label">Date</div>
+                    <input type="date" id="log-date">
+                  </div>
+                  <div class="form-group">
+                    <div class="form-label">Sets</div>
+                    <div id="log-exercises"></div>
+                  </div>
+                  <div style="display:flex;gap:8px">
+                    <button class="btn btn-ghost" onclick="addLogExerciseRow()">+ ADD SET</button>
+                    <button class="btn btn-primary" style="flex:1" onclick="saveLog()">SAVE LOG</button>
+                  </div>
+                </div>
+        </div>
+      </div>
 
   <!-- ══════════════════════════════════════════
      MODAL: NEW TEMPLATE
@@ -3042,6 +3078,233 @@
       saveData(DB);
       renderTemplates();
     }
+
+    // ══════════════════════════════════════════
+    // NEW LOG (manual entry)
+    // ══════════════════════════════════════════
+
+    let logExerciseCount = 0;
+
+    function openNewLogModal() {
+      logExerciseCount = 0;
+      const today = new Date().toISOString().split('T')[0];
+      const nameEl = document.getElementById('log-name');
+      const dateEl = document.getElementById('log-date');
+      const container = document.getElementById('log-exercises');
+      if (nameEl) nameEl.value = '';
+      if (dateEl) dateEl.value = today;
+      if (container) container.innerHTML = '';
+      addLogExerciseRow();
+      openModal('modal-log');
+    }
+
+    function addLogExerciseRow(ex) {
+      const i = logExerciseCount++;
+      const container = document.getElementById('log-exercises');
+      if (!container) return;
+      const div = document.createElement('div');
+      div.className = 'template-exercise-editor';
+      div.style.cssText = 'display:flex;flex-direction:column;gap:8px;margin-bottom:12px';
+      div.innerHTML = `
+    <div style="display:flex;gap:8px;align-items:flex-start">
+      <div style="flex:2">
+        <input type="text" placeholder="Exercise" id="log-ex-name-${i}" oninput="handleLogExerciseSearchInput(${i})" onfocus="handleLogExerciseSearchInput(${i})">
+        <div class="search-dropdown" id="log-ex-results-${i}"></div>
+      </div>
+      <div style="flex:1">
+        <input type="text" placeholder="Equipment" id="log-ex-equip-${i}" oninput="handleLogEquipmentSearchInput(${i})" onfocus="handleLogEquipmentSearchInput(${i})">
+        <div class="search-dropdown" id="log-ex-equip-results-${i}"></div>
+      </div>
+      <input type="number" placeholder="Weight" id="log-ex-weight-${i}" style="flex:0.9;min-width:80px">
+      <input type="number" placeholder="Reps" id="log-ex-reps-${i}" style="flex:0.8;min-width:60px">
+      <input type="number" placeholder="RPE" id="log-ex-rpe-${i}" style="flex:0.6;min-width:60px">
+      <button class="btn btn-ghost" style="padding:8px;flex-shrink:0" onclick="this.closest('.template-exercise-editor').remove()">✕</button>
+    </div>
+  `;
+      div.querySelectorAll('input').forEach(inp => inp.addEventListener('keydown', e => e.stopPropagation()));
+      // capture previous row values (if any) so new row can copy all columns
+      const prevRow = container.querySelector('.template-exercise-editor:last-child');
+      container.appendChild(div);
+      if (prevRow) {
+        try {
+          const prevName = prevRow.querySelector('input[id^="log-ex-name-"]')?.value || '';
+          const prevEquip = prevRow.querySelector('input[id^="log-ex-equip-"]')?.value || '';
+          const prevWeight = prevRow.querySelector('input[id^="log-ex-weight-"]')?.value || '';
+          const prevReps = prevRow.querySelector('input[id^="log-ex-reps-"]')?.value || '';
+          const prevRpe = prevRow.querySelector('input[id^="log-ex-rpe-"]')?.value || '';
+          if (prevName || prevEquip || prevWeight || prevReps || prevRpe) {
+            const newName = document.getElementById(`log-ex-name-${i}`);
+            const newEquip = document.getElementById(`log-ex-equip-${i}`);
+            const newWeight = document.getElementById(`log-ex-weight-${i}`);
+            const newReps = document.getElementById(`log-ex-reps-${i}`);
+            const newRpe = document.getElementById(`log-ex-rpe-${i}`);
+            if (newName && prevName) newName.value = prevName;
+            if (newEquip) newEquip.value = prevEquip || (prevName ? getDefaultEquipmentForExercise(prevName) : '') || '';
+            if (newWeight && prevWeight) newWeight.value = prevWeight;
+            if (newReps && prevReps) newReps.value = prevReps;
+            if (newRpe && prevRpe) newRpe.value = prevRpe;
+          }
+        } catch (err) { /* ignore */ }
+      }
+      if (ex) {
+        const n = document.getElementById(`log-ex-name-${i}`);
+        const eq = document.getElementById(`log-ex-equip-${i}`);
+        const w = document.getElementById(`log-ex-weight-${i}`);
+        const r = document.getElementById(`log-ex-reps-${i}`);
+        const p = document.getElementById(`log-ex-rpe-${i}`);
+        if (n) n.value = ex.name || '';
+        if (eq) eq.value = ex.equipment || '';
+        if (w) w.value = ex.weight || '';
+        if (r) r.value = ex.reps || '';
+        if (p) p.value = ex.rpe || '';
+      }
+    }
+
+    function saveLog() {
+      const name = (document.getElementById('log-name')?.value || '').trim();
+      if (!name) { showToast('Add a workout name'); return; }
+      const date = (document.getElementById('log-date')?.value) || new Date().toISOString().split('T')[0];
+      const session = {
+        id: 'sess_' + Date.now(),
+        templateId: null,
+        templateName: name,
+        date: date,
+        startedAt: new Date().toISOString(),
+        finishedAt: new Date().toISOString(),
+        sets: []
+      };
+
+      const container = document.getElementById('log-exercises');
+      if (container) {
+        const rows = container.querySelectorAll('.template-exercise-editor');
+        rows.forEach(row => {
+          const nameInput = row.querySelector('input[id^="log-ex-name-"]');
+          if (!nameInput) return;
+          const idx = nameInput.id.split('-').pop();
+          const exName = (document.getElementById(`log-ex-name-${idx}`)?.value || '').trim();
+          if (!exName) return;
+          const equipment = (document.getElementById(`log-ex-equip-${idx}`)?.value || '').trim();
+          const weight = (document.getElementById(`log-ex-weight-${idx}`)?.value || '').trim();
+          const reps = (document.getElementById(`log-ex-reps-${idx}`)?.value || '').trim();
+          const rpe = (document.getElementById(`log-ex-rpe-${idx}`)?.value || '').trim();
+          const existing = session.sets.filter(s => s.exerciseName === exName).length;
+          session.sets.push({
+            exerciseName: exName,
+            equipment: equipment,
+            setType: String(existing + 1),
+            weight: weight,
+            unit: getPreferredUnit(),
+            reps: reps,
+            rpe: rpe,
+            notes: '',
+            completed: false
+          });
+        });
+      }
+
+      if (!session.sets.length) { showToast('Add at least one set'); return; }
+
+      DB.sessions.push(session);
+      saveData(DB);
+      closeModal('modal-log');
+      renderLog();
+      showToast('Log created');
+    }
+
+    // Log modal: exercise/equipment autocomplete
+    function handleLogExerciseSearchInput(index) {
+      renderLogExerciseSearchResults(index);
+    }
+
+    function renderLogExerciseSearchResults(index) {
+      const inputEl = document.getElementById(`log-ex-name-${index}`);
+      const resultsEl = document.getElementById(`log-ex-results-${index}`);
+      if (!inputEl || !resultsEl) return;
+      const query = inputEl.value.trim();
+      const normalized = normalizeExerciseName(query);
+      const matches = getKnownExercises().filter(ex => !normalized || normalizeExerciseName(ex.name).includes(normalized)).slice(0, 6);
+      if (!query && !matches.length) { resultsEl.classList.remove('show'); resultsEl.innerHTML = ''; return; }
+      const exactMatch = matches.find(ex => normalizeExerciseName(ex.name) === normalized);
+      const rows = matches.map(ex => `
+        <button class="search-option" type="button" onclick="selectLogExerciseOption(${index}, '${escapeJsString(ex.name)}', '${escapeJsString(ex.equipment||'')}')">
+          <div class="search-option-name">${escapeHtml(ex.name)}</div>
+          <div class="search-option-meta">${escapeHtml(ex.equipment || 'Equipment not set')}</div>
+        </button>
+      `);
+      if (query && !exactMatch) {
+        rows.push(`
+          <button class="search-option" type="button" onclick="createLogExerciseOptionFromInput(${index})">
+            <div class="search-option-name">Create "${escapeHtml(query)}"</div>
+            <div class="search-option-meta">Use this as a new movement</div>
+          </button>
+        `);
+      }
+      resultsEl.innerHTML = rows.join('');
+      resultsEl.classList.add('show');
+    }
+
+    function selectLogExerciseOption(index, name, equipment) {
+      const nameEl = document.getElementById(`log-ex-name-${index}`);
+      const equipEl = document.getElementById(`log-ex-equip-${index}`);
+      if (nameEl) nameEl.value = name;
+      if (equipEl && !equipEl.value.trim()) equipEl.value = equipment || '';
+      const resultsEl = document.getElementById(`log-ex-results-${index}`);
+      if (resultsEl) { resultsEl.classList.remove('show'); resultsEl.innerHTML = ''; }
+    }
+
+    function createLogExerciseOptionFromInput(index) {
+      const nameEl = document.getElementById(`log-ex-name-${index}`);
+      if (!nameEl) return;
+      const name = nameEl.value.trim();
+      const equipEl = document.getElementById(`log-ex-equip-${index}`);
+      if (equipEl && !equipEl.value.trim()) {
+        equipEl.value = getDefaultEquipmentForExercise(name) || '';
+      }
+      const resultsEl = document.getElementById(`log-ex-results-${index}`);
+      if (resultsEl) { resultsEl.classList.remove('show'); resultsEl.innerHTML = ''; }
+    }
+
+    function handleLogEquipmentSearchInput(index) {
+      renderLogEquipmentSearchResults(index);
+    }
+
+    function renderLogEquipmentSearchResults(index) {
+      const inputEl = document.getElementById(`log-ex-equip-${index}`);
+      const resultsEl = document.getElementById(`log-ex-equip-results-${index}`);
+      if (!inputEl || !resultsEl) return;
+      const query = inputEl.value.trim();
+      const normalized = normalizeExerciseName(query);
+      const matches = getKnownEquipment().filter(item => !normalized || normalizeExerciseName(item).includes(normalized)).slice(0, 6);
+      if (!query && !matches.length) { resultsEl.classList.remove('show'); resultsEl.innerHTML = ''; return; }
+      const exactMatch = matches.find(item => normalizeExerciseName(item) === normalized);
+      const rows = matches.map(item => `
+        <button class="search-option" type="button" onclick="selectLogEquipmentOption(${index}, '${escapeJsString(item)}')">
+          <div class="search-option-name">${escapeHtml(item)}</div>
+        </button>
+      `);
+      if (query && !exactMatch) {
+        rows.push(`
+          <button class="search-option" type="button" onclick="createLogEquipmentOptionFromInput(${index})">
+            <div class="search-option-name">Create "${escapeHtml(query)}"</div>
+          </button>
+        `);
+      }
+      resultsEl.innerHTML = rows.join('');
+      resultsEl.classList.add('show');
+    }
+
+    function selectLogEquipmentOption(index, name) {
+      const inputEl = document.getElementById(`log-ex-equip-${index}`);
+      if (inputEl) inputEl.value = name;
+      const resultsEl = document.getElementById(`log-ex-equip-results-${index}`);
+      if (resultsEl) { resultsEl.classList.remove('show'); resultsEl.innerHTML = ''; }
+    }
+
+    function createLogEquipmentOptionFromInput(index) {
+      const resultsEl = document.getElementById(`log-ex-equip-results-${index}`);
+      if (resultsEl) { resultsEl.classList.remove('show'); resultsEl.innerHTML = ''; }
+    }
+
 
     // ══════════════════════════════════════════
     // UTILS

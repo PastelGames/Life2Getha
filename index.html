@@ -1260,11 +1260,20 @@
         <button class="btn btn-ghost" onclick="pullFromSupabase()">GET CLOUD COPY</button>
         <button class="btn btn-danger" onclick="signOutSupabase()">LOG OUT</button>
       </div>
-      <div class="sync-row">
-        <button class="btn btn-ghost" onclick="exportData()">DOWNLOAD JSON</button>
-        <button class="btn btn-ghost" onclick="exportSessionsCsv()">DOWNLOAD CSV</button>
-      </div>
       <div class="sync-status" id="supabase-status">READY WHEN YOU ARE</div>
+    </div>
+
+    <div class="sync-card" style="margin-top: 24px;">
+      <div class="sync-title">LOCAL SYNC</div>
+      <div style="font-size: 12px; margin-bottom: 16px; opacity: 0.6; text-align: center; font-weight: 500;">DONT WANNA SIGN IN? DOWNLOAD AND UPLOAD YOUR DATA HERE</div>
+      <div class="sync-row">
+        <button class="btn btn-ghost" onclick="document.getElementById('import-input-sync').click()">UPLOAD JSON</button>
+        <button class="btn btn-ghost" onclick="exportData()">DOWNLOAD JSON</button>
+      </div>
+      <div class="sync-row" style="margin-top: 8px;">
+        <button class="btn btn-ghost btn-full" onclick="exportSessionsCsv()">DOWNLOAD SESSIONS CSV</button>
+      </div>
+      <input type="file" id="import-input-sync" accept=".json" style="display:none" onchange="importData(event)">
     </div>
   </div>
 

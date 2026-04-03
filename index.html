@@ -2500,6 +2500,10 @@
       saveData(DB);
       renderActiveWorkout();
       showToast('Session logged! 💪');
+
+      if (typeof supabaseSession !== 'undefined' && supabaseSession && supabaseSession.user) {
+        pushToSupabase();
+      }
     }
 
     // ══════════════════════════════════════════

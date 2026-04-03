@@ -2802,6 +2802,7 @@
       </div>
       <div class="template-actions">
         <button class="btn btn-primary" style="flex:1" onclick="startWorkout('${tpl.id}')">▶ START</button>
+        <button class="btn btn-ghost" onclick="openEditTemplateModal('${tpl.id}')">✎ EDIT</button>
         <button class="btn btn-danger" onclick="deleteTemplate('${tpl.id}')">✕</button>
       </div>
     </div>
@@ -2809,8 +2810,11 @@
     }
 
     let templateExerciseCount = 0;
+    let editingTemplateId = null;
 
     function openNewTemplateModal() {
+      editingTemplateId = null;
+      document.getElementById('modal-template').querySelector('.modal-title').textContent = 'NEW TEMPLATE';
       templateExerciseCount = 0;
       templateExerciseSelections = {};
       document.getElementById('tmpl-name').value = '';
@@ -2819,10 +2823,31 @@
       openModal('modal-template');
     }
 
-    function addTemplateExerciseRow() {
+    function openEditTemplateModal(id) {
+      editingTemplateId = id;
+      const tpl = DB.templates.find(t => t.id === id);
+      if (!tpl) return;
+      document.getElementById('modal-template').querySelector('.modal-title').textContent = 'EDIT TEMPLATE';
+      templateExerciseCount = 0;
+      templateExerciseSelections = {};
+      document.getElementById('tmpl-name').value = tpl.name;
+      document.getElementById('tmpl-exercises').innerHTML = '<div class="form-label" style="margin-bottom:10px">Exercises</div>';
+      tpl.exercises.forEach(ex => addTemplateExerciseRow(ex));
+      if (!tpl.exercises.length) addTemplateExerciseRow();
+      openModal('modal-template');
+    }
+
+    function addTemplateExerciseRow(ex = null) {
       const i = templateExerciseCount++;
       const div = document.createElement('div');
       div.style.cssText = 'display:flex;flex-direction:column;gap:8px;margin-bottom:12px';
+      
+      const numSets = ex ? ex.sets.filter(s => s.type !== 'W').length : 3;
+
+      if (ex) {
+         templateExerciseSelections[i] = { name: ex.name, equipment: ex.equipment };
+      }
+
       div.innerHTML = `
     <div style="display:flex;gap:8px;align-items:flex-start">
       <div style="flex:2">
@@ -2833,12 +2858,17 @@
         <input type="text" placeholder="Search equipment" id="tex-equip-${i}" oninput="handleTemplateEquipmentSearchInput(${i})" onfocus="handleTemplateEquipmentSearchInput(${i})">
         <div class="search-dropdown" id="tex-equip-results-${i}"></div>
       </div>
-      <input type="number" placeholder="Sets" id="tex-sets-${i}" style="flex:0.8;min-width:50px" value="3">
+      <input type="number" placeholder="Sets" id="tex-sets-${i}" style="flex:0.8;min-width:50px" value="${numSets}">
       <button class="btn btn-ghost" style="padding:8px;flex-shrink:0" onclick="delete templateExerciseSelections[${i}]; this.closest('.template-exercise-editor').remove()">✕</button>
     </div>
   `;
       div.className = 'template-exercise-editor';
       document.getElementById('tmpl-exercises').appendChild(div);
+
+      if (ex) {
+        document.getElementById(`tex-name-${i}`).value = ex.name;
+        document.getElementById(`tex-equip-${i}`).value = ex.equipment;
+      }
     }
 
     function saveTemplate() {
@@ -2862,7 +2892,16 @@
 
       if (!exercises.length) { showToast('Add at least one exercise'); return; }
 
-      DB.templates.push({ id: 'tpl_' + Date.now(), name, exercises });
+      if (editingTemplateId) {
+        const tpl = DB.templates.find(t => t.id === editingTemplateId);
+        if (tpl) {
+          tpl.name = name;
+          tpl.exercises = exercises;
+        }
+      } else {
+        DB.templates.push({ id: 'tpl_' + Date.now(), name, exercises });
+      }
+
       saveData(DB);
       closeModal('modal-template');
       renderTemplates();

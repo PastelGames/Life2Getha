@@ -1,0 +1,446 @@
+{
+  "templates": [
+    {
+      "id": "tpl_fullbody",
+      "name": "Full Body",
+      "exercises": [
+        {
+          "name": "Squat",
+          "equipment": "Barbell",
+          "sets": [
+            {
+              "type": "W",
+              "reps": 5
+            },
+            {
+              "type": "W",
+              "reps": 5
+            },
+            {
+              "type": "W",
+              "reps": 5
+            },
+            {
+              "type": "1",
+              "reps": 5
+            },
+            {
+              "type": "2",
+              "reps": 5
+            },
+            {
+              "type": "3",
+              "reps": 5
+            }
+          ]
+        },
+        {
+          "name": "Bench Press",
+          "equipment": "Dumbbell",
+          "sets": [
+            {
+              "type": "W",
+              "reps": 5
+            },
+            {
+              "type": "W",
+              "reps": 5
+            },
+            {
+              "type": "W",
+              "reps": 5
+            },
+            {
+              "type": "1",
+              "reps": 5
+            },
+            {
+              "type": "2",
+              "reps": 5
+            },
+            {
+              "type": "3",
+              "reps": 5
+            }
+          ]
+        },
+        {
+          "name": "Romanian Deadlift",
+          "equipment": "Dumbbell",
+          "sets": [
+            {
+              "type": "W",
+              "reps": 5
+            },
+            {
+              "type": "1",
+              "reps": 5
+            },
+            {
+              "type": "2",
+              "reps": 5
+            },
+            {
+              "type": "3",
+              "reps": 5
+            }
+          ]
+        },
+        {
+          "name": "Lat Pulldown",
+          "equipment": "Machine",
+          "sets": [
+            {
+              "type": "1",
+              "reps": 0
+            },
+            {
+              "type": "2",
+              "reps": 0
+            },
+            {
+              "type": "3",
+              "reps": 0
+            }
+          ]
+        },
+        {
+          "name": "Overhead Press",
+          "equipment": "Barbell",
+          "sets": [
+            {
+              "type": "1",
+              "reps": 5
+            },
+            {
+              "type": "2",
+              "reps": 5
+            },
+            {
+              "type": "3",
+              "reps": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tpl_1775194188143",
+      "name": "Empty",
+      "exercises": [
+        {
+          "name": "Squat",
+          "equipment": "",
+          "sets": [
+            {
+              "type": "1",
+              "reps": 0
+            },
+            {
+              "type": "2",
+              "reps": 0
+            },
+            {
+              "type": "3",
+              "reps": 0
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "sessions": [
+    {
+      "id": "sess_20260402",
+      "templateId": "tpl_fullbody",
+      "templateName": "Full Body",
+      "date": "2026-04-02",
+      "finishedAt": "2026-04-02T00:00:00.000Z",
+      "sets": [
+        {
+          "exerciseName": "Squat",
+          "equipment": "Barbell",
+          "setType": "W",
+          "weight": "45",
+          "unit": "lb",
+          "reps": "5",
+          "rpe": "",
+          "notes": ""
+        },
+        {
+          "exerciseName": "Squat",
+          "equipment": "Barbell",
+          "setType": "W",
+          "weight": "95",
+          "unit": "lb",
+          "reps": "5",
+          "rpe": "",
+          "notes": ""
+        },
+        {
+          "exerciseName": "Squat",
+          "equipment": "Barbell",
+          "setType": "W",
+          "weight": "135",
+          "unit": "lb",
+          "reps": "5",
+          "rpe": "",
+          "notes": ""
+        },
+        {
+          "exerciseName": "Squat",
+          "equipment": "Barbell",
+          "setType": "1",
+          "weight": "200",
+          "unit": "lb",
+          "reps": "5",
+          "rpe": "",
+          "notes": ""
+        },
+        {
+          "exerciseName": "Squat",
+          "equipment": "Barbell",
+          "setType": "2",
+          "weight": "200",
+          "unit": "lb",
+          "reps": "5",
+          "rpe": "6",
+          "notes": ""
+        },
+        {
+          "exerciseName": "Squat",
+          "equipment": "Barbell",
+          "setType": "3",
+          "weight": "200",
+          "unit": "lb",
+          "reps": "5",
+          "rpe": "",
+          "notes": ""
+        },
+        {
+          "exerciseName": "Bench Press",
+          "equipment": "Dumbbell",
+          "setType": "W",
+          "weight": "25",
+          "unit": "lb",
+          "reps": "5",
+          "rpe": "",
+          "notes": ""
+        },
+        {
+          "exerciseName": "Bench Press",
+          "equipment": "Dumbbell",
+          "setType": "W",
+          "weight": "35",
+          "unit": "lb",
+          "reps": "5",
+          "rpe": "",
+          "notes": ""
+        },
+        {
+          "exerciseName": "Bench Press",
+          "equipment": "Dumbbell",
+          "setType": "W",
+          "weight": "45",
+          "unit": "lb",
+          "reps": "5",
+          "rpe": "",
+          "notes": ""
+        },
+        {
+          "exerciseName": "Bench Press",
+          "equipment": "Dumbbell",
+          "setType": "1",
+          "weight": "65",
+          "unit": "lb",
+          "reps": "5",
+          "rpe": "",
+          "notes": ""
+        },
+        {
+          "exerciseName": "Bench Press",
+          "equipment": "Dumbbell",
+          "setType": "2",
+          "weight": "70",
+          "unit": "lb",
+          "reps": "5",
+          "rpe": "9",
+          "notes": ""
+        },
+        {
+          "exerciseName": "Bench Press",
+          "equipment": "Dumbbell",
+          "setType": "3",
+          "weight": "70",
+          "unit": "lb",
+          "reps": "5",
+          "rpe": "10",
+          "notes": ""
+        },
+        {
+          "exerciseName": "Romanian Deadlift",
+          "equipment": "Dumbbell",
+          "setType": "W",
+          "weight": "25",
+          "unit": "lb",
+          "reps": "5",
+          "rpe": "",
+          "notes": ""
+        },
+        {
+          "exerciseName": "Romanian Deadlift",
+          "equipment": "Dumbbell",
+          "setType": "1",
+          "weight": "65",
+          "unit": "lb",
+          "reps": "5",
+          "rpe": "",
+          "notes": ""
+        },
+        {
+          "exerciseName": "Romanian Deadlift",
+          "equipment": "Dumbbell",
+          "setType": "2",
+          "weight": "65",
+          "unit": "lb",
+          "reps": "5",
+          "rpe": "",
+          "notes": ""
+        },
+        {
+          "exerciseName": "Romanian Deadlift",
+          "equipment": "Dumbbell",
+          "setType": "3",
+          "weight": "65",
+          "unit": "lb",
+          "reps": "5",
+          "rpe": "",
+          "notes": ""
+        },
+        {
+          "exerciseName": "Lat Pulldown",
+          "equipment": "Machine",
+          "setType": "1",
+          "weight": "120",
+          "unit": "lb",
+          "reps": "14",
+          "rpe": "10",
+          "notes": ""
+        },
+        {
+          "exerciseName": "Lat Pulldown",
+          "equipment": "Machine",
+          "setType": "2",
+          "weight": "120",
+          "unit": "lb",
+          "reps": "13",
+          "rpe": "10",
+          "notes": ""
+        },
+        {
+          "exerciseName": "Lat Pulldown",
+          "equipment": "Machine",
+          "setType": "3",
+          "weight": "120",
+          "unit": "lb",
+          "reps": "9",
+          "rpe": "10",
+          "notes": ""
+        },
+        {
+          "exerciseName": "Overhead Press",
+          "equipment": "Dumbbell",
+          "setType": "1",
+          "weight": "35",
+          "unit": "lb",
+          "reps": "5",
+          "rpe": "",
+          "notes": ""
+        },
+        {
+          "exerciseName": "Overhead Press",
+          "equipment": "Dumbbell",
+          "setType": "2",
+          "weight": "35",
+          "unit": "lb",
+          "reps": "5",
+          "rpe": "5",
+          "notes": ""
+        },
+        {
+          "exerciseName": "Overhead Press",
+          "equipment": "Dumbbell",
+          "setType": "3",
+          "weight": "35",
+          "unit": "lb",
+          "reps": "5",
+          "rpe": "5",
+          "notes": ""
+        }
+      ]
+    }
+  ],
+  "activeSession": {
+    "id": "sess_1775194191376",
+    "templateId": "tpl_1775194188143",
+    "templateName": "Empty",
+    "date": "2026-04-03",
+    "sets": [
+      {
+        "exerciseName": "Squat",
+        "equipment": "",
+        "setType": "1",
+        "weight": "",
+        "unit": "lb",
+        "reps": "",
+        "rpe": "",
+        "notes": "",
+        "completed": false
+      },
+      {
+        "exerciseName": "Squat",
+        "equipment": "",
+        "setType": "2",
+        "weight": "",
+        "unit": "lb",
+        "reps": "",
+        "rpe": "",
+        "notes": "",
+        "completed": false
+      },
+      {
+        "exerciseName": "Squat",
+        "equipment": "",
+        "setType": "3",
+        "weight": "",
+        "unit": "lb",
+        "reps": "",
+        "rpe": "",
+        "notes": "",
+        "completed": false
+      },
+      {
+        "exerciseName": "Squat",
+        "equipment": "",
+        "setType": "4",
+        "weight": "",
+        "unit": "lb",
+        "reps": "",
+        "rpe": "",
+        "notes": "",
+        "completed": false
+      },
+      {
+        "exerciseName": "Squat",
+        "equipment": "",
+        "setType": "5",
+        "weight": "",
+        "unit": "lb",
+        "reps": "",
+        "rpe": "",
+        "notes": "",
+        "completed": false
+      }
+    ]
+  }
+}

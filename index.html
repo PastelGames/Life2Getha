@@ -2723,7 +2723,8 @@
             <div class="log-entry-meta">
               ${durationLabel}<br>${workSets.length} SETS · ${exercises.length} EXERCISES
             </div>
-            <button class="icon-btn" onclick="event.stopPropagation(); deleteLoggedSession(${sessionIndex})" aria-label="Delete log">
+              <button class="btn btn-ghost" style="padding:8px;min-width:64px" onclick="event.stopPropagation(); openEditLoggedSession(${sessionIndex})" aria-label="Edit log">✎ EDIT</button>
+              <button class="icon-btn" onclick="event.stopPropagation(); deleteLoggedSession(${sessionIndex})" aria-label="Delete log">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
             </button>
           </div>
@@ -3084,6 +3085,26 @@
     // ══════════════════════════════════════════
 
     let logExerciseCount = 0;
+    let editingSessionIndex = null;
+
+    function openEditLoggedSession(index) {
+      const session = DB.sessions[index];
+      if (!session) return;
+      editingSessionIndex = index;
+      document.querySelector('#modal-log .modal-title').textContent = 'EDIT LOG';
+      const nameEl = document.getElementById('log-name');
+      const dateEl = document.getElementById('log-date');
+      const container = document.getElementById('log-exercises');
+      logExerciseCount = 0;
+      if (nameEl) nameEl.value = session.templateName || '';
+      if (dateEl) dateEl.value = session.date || new Date().toISOString().split('T')[0];
+      if (container) container.innerHTML = '';
+      // add rows from session.sets
+      session.sets.forEach(st => {
+        addLogExerciseRow({ name: st.exerciseName, equipment: st.equipment, weight: st.weight, reps: st.reps, rpe: st.rpe });
+      });
+      openModal('modal-log');
+    }
 
     function openNewLogModal() {
       logExerciseCount = 0;
@@ -3095,6 +3116,8 @@
       if (dateEl) dateEl.value = today;
       if (container) container.innerHTML = '';
       addLogExerciseRow();
+      editingSessionIndex = null;
+      document.querySelector('#modal-log .modal-title').textContent = 'NEW LOG';
       openModal('modal-log');
     }
 
@@ -3204,7 +3227,19 @@
 
       if (!session.sets.length) { showToast('Add at least one set'); return; }
 
-      DB.sessions.push(session);
+      if (editingSessionIndex !== null && typeof editingSessionIndex !== 'undefined') {
+        // preserve original timestamps if present
+        const existing = DB.sessions[editingSessionIndex] || {};
+        session.id = existing.id || session.id;
+        session.startedAt = existing.startedAt || session.startedAt;
+        session.finishedAt = existing.finishedAt || session.finishedAt;
+        session.durationMinutes = existing.durationMinutes || getSessionDurationMinutes(session, session.finishedAt);
+        DB.sessions[editingSessionIndex] = session;
+        editingSessionIndex = null;
+      } else {
+        session.durationMinutes = getSessionDurationMinutes(session, session.finishedAt);
+        DB.sessions.push(session);
+      }
       saveData(DB);
       closeModal('modal-log');
       renderLog();

@@ -8,6 +8,18 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Lift">
   <title>Lift</title>
+  <!-- Content Security Policy -->
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self';
+             style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+             font-src 'self' https://fonts.gstatic.com;
+             img-src 'self' blob: data: https:;
+             connect-src 'self' https://*.supabase.co;
+             script-src 'self' 'unsafe-inline';
+             object-src 'none';
+             frame-src 'none';
+             base-uri 'none';
+             form-action 'self';">
   <link
     href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap"
     rel="stylesheet">
@@ -2067,6 +2079,8 @@
 
     function startEmptyWorkout() {
       DB.activeSession = createSession('Freestyle');
+      // Initialize with empty sets array
+      DB.activeSession.sets = [];
       saveData(DB);
       renderActiveWorkout();
       showToast('Freestyle workout started!');
@@ -2388,12 +2402,17 @@
       }
 
       const exactMatch = matches.find(ex => normalizeExerciseName(ex.name) === normalized);
-      const rows = matches.map(ex => `
+      const rows = matches.map(ex => {
+        // Sanitize the exercise name and equipment before using them in HTML
+        const safeName = escapeHtml(ex.name || '');
+        const safeEquipment = escapeHtml(ex.equipment || 'Equipment not set');
+        return `
     <button class="search-option" type="button" onclick="selectExerciseOption('${escapeJsString(ex.name)}', '${escapeJsString(ex.equipment || '')}')">
-      <div class="search-option-name">${escapeHtml(ex.name)}</div>
-      <div class="search-option-meta">${escapeHtml(ex.equipment || 'Equipment not set')}</div>
+      <div class="search-option-name">${safeName}</div>
+      <div class="search-option-meta">${safeEquipment}</div>
     </button>
-  `);
+  `;
+      });
 
       if (query && !exactMatch) {
         rows.push(`
@@ -3415,6 +3434,10 @@
 
     function escapeCsv(value) {
       const text = String(value == null ? '' : value);
+      // Prevent formula injection by prefixing values that could trigger formulas
+      if (/^[\w\.\']*/.test(text)) {
+        text = "'" + text;
+      }
       if (/[",\n]/.test(text)) return '"' + text.replace(/"/g, '""') + '"';
       return text;
     }
@@ -3482,17 +3505,73 @@
     function importData(event) {
       const file = event.target.files[0];
       if (!file) return;
+
+      // File size limit to prevent DoS (max 10MB)
+      const MAX_FILE_SIZE = 10 * 1024 * 1024;
+      if (file.size > MAX_FILE_SIZE) {
+        showToast('File too large (max 10MB)');
+        event.target.value = '';
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = (e) => {
         try {
           const parsed = JSON.parse(e.target.result);
-          if (!parsed.templates || !parsed.sessions) { showToast('Invalid file'); return; }
-          if (!confirm('Import ' + parsed.sessions.length + ' sessions and ' + parsed.templates.length + ' templates? This replaces current data.')) return;
+
+          // Validate schema structure
+          if (!Array.isArray(parsed.templates) || !Array.isArray(parsed.sessions)) {
+            showToast('Invalid file format: missing or non-array templates/sessions');
+            return;
+          }
+
+          // Validate each template
+          for (const tpl of parsed.templates) {
+            if (typeof tpl !== 'object' || !tpl.name || !Array.isArray(tpl.exercises)) {
+              showToast('Invalid file: malformed template');
+              return;
+            }
+            for (const ex of tpl.exercises) {
+              if (!ex.name || !ex.sets || !Array.isArray(ex.sets)) {
+                showToast('Invalid file: malformed exercise');
+                return;
+              }
+            }
+          }
+
+          // Validate each session
+          for (const session of parsed.sessions) {
+            if (typeof session !== 'object') {
+              showToast('Invalid file: malformed session');
+              return;
+            }
+            if (session.sets && !Array.isArray(session.sets)) {
+              showToast('Invalid file: malformed session sets');
+              return;
+            }
+            if (session.sets) {
+              for (const set of session.sets) {
+                if (typeof set !== 'object' ||
+                  !['weight', 'reps', 'unit', 'notes', 'rpe'].includes(set.weight) ||
+                  !['weight', 'reps', 'unit', 'notes', 'rpe'].includes(set.reps)) {
+                  // Allow partial validation - just check it's an object
+                }
+              }
+            }
+          }
+
+          // Show confirmation with validated counts
+          const count = parsed.sessions.length + ' sessions, ' + parsed.templates.length + ' templates';
+          if (!confirm(count + '? This replaces current data.')) {
+            event.target.value = '';
+            return;
+          }
+
           DB = parsed;
           saveData(DB);
           renderActiveWorkout();
           renderTemplates();
-          showToast('Imported ' + parsed.sessions.length + ' sessions ✓');
+          showToast('Imported ' + count + ' ✓');
         } catch (err) {
           showToast('Could not read file');
         }

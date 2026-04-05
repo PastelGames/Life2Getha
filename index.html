@@ -2074,6 +2074,8 @@
       saveData(DB);
       renderActiveWorkout();
       closeModal('modal-template');
+      // Navigate to workout page automatically
+      showPage('workout', document.getElementById('nav-workout'));
       showToast('Workout started!');
     }
 
@@ -2083,6 +2085,8 @@
       DB.activeSession.sets = [];
       saveData(DB);
       renderActiveWorkout();
+      // Navigate to workout page automatically
+      showPage('workout', document.getElementById('nav-workout'));
       showToast('Freestyle workout started!');
     }
 
@@ -3262,6 +3266,10 @@
       saveData(DB);
       closeModal('modal-log');
       renderLog();
+      // Navigate to workout page for newly created session
+      DB.activeSession = session;
+      renderActiveWorkout();
+      showPage('workout', document.getElementById('nav-workout'));
       showToast('Log created');
     }
 
